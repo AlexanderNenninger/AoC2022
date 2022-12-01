@@ -7,4 +7,4 @@ To run: `cargo run --release [days...]`
 
 ## Downloading Inputs
 
-Get a session cookie from your browser and copy it into `cookie.key`. Then run `./get-input.sh 1`.
+Get a session cookie from your browser and copy it into `cookie.key`. Then run `./get-input.sh day_you_want_to_download`.
