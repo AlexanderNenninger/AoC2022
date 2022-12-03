@@ -1,4 +1,6 @@
 #![allow(dead_code, unused_imports)]
+#![feature(iter_array_chunks)]
+
 mod days;
 mod etc;
 
