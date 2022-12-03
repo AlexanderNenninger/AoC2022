@@ -1,7 +1,6 @@
 use crate::{Solution, SolutionPair};
 use std::{error::Error, fs::read_to_string, str::FromStr};
 ///////////////////////////////////////////////////////////////////////////////
-type ErasedError = Box<dyn Error + Send + Sync + 'static>;
 fn priority(c: char) -> u64 {
     if c.is_ascii_lowercase() {
         return c as u64 - 'a' as u64 + 1;
