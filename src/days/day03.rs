@@ -1,140 +1,43 @@
-use itertools::Itertools;
-
 use crate::{Solution, SolutionPair};
 use std::{error::Error, fs::read_to_string, str::FromStr};
 ///////////////////////////////////////////////////////////////////////////////
-type ErasedError = Box<dyn Error + Send + Sync + 'static>;
-fn priority(c: char) -> Result<u64, ErasedError> {
+fn priority(c: char) -> u64 {
     if c.is_ascii_lowercase() {
-        return Ok(c as u64 - 'a' as u64 + 1);
+        return c as u64 - 'a' as u64 + 1;
     }
     if c.is_ascii_uppercase() {
-        return Ok(c as u64 - 'A' as u64 + 27);
+        return c as u64 - 'A' as u64 + 27;
     }
-    return Err("ERROR: character invalid.".into());
+    0
 }
 
-struct Rucksack {
-    compartment_1: Vec<u64>,
-    compartment_2: Vec<u64>,
-}
-
-impl FromStr for Rucksack {
-    type Err = ErasedError;
-    fn from_str(s: &str) -> Result<Self, Self::Err> {
-        let n_items = s.len();
-        if n_items % 2 != 0 {
-            return Err("ERROR: Input has uneven number of items.".into());
+fn score_shares<const N: usize>(input: [&str; N]) -> u64 {
+    let mut all_present = u64::MAX;
+    for i in 0..N {
+        let mut counts = 0u64;
+        for c in input[i].chars() {
+            let nbits = priority(c);
+            counts |= 1 << nbits;
         }
-        let items: Vec<u64> = s
-            .chars()
-            .into_iter()
-            .map(priority)
-            .collect::<Result<_, ErasedError>>()?;
-        Ok(Rucksack {
-            compartment_1: items[..n_items / 2].to_vec(),
-            compartment_2: items[n_items / 2..].to_vec(),
-        })
+        all_present &= counts;
     }
-}
-impl Rucksack {
-    fn score_duplicated(&self) -> u64 {
-        let mut counts_1 = [0 as u64; 52];
-        let mut counts_2 = [0 as u64; 52];
-        for item in self.compartment_1.iter() {
-            counts_1[*item as usize - 1] += 1
-        }
-        for item in self.compartment_2.iter() {
-            counts_2[*item as usize - 1] += 1
-        }
-
-        counts_1
-            .into_iter()
-            .zip(counts_2)
-            .enumerate()
-            .map(|(idx, (c1, c2))| if c1 > 0 && c2 > 0 { idx + 1 } else { 0 })
-            .sum::<usize>() as u64
-    }
+    all_present.trailing_zeros() as u64
 }
 
 fn part_1(input: &str) -> u64 {
-    let rucksacks: Vec<Rucksack> = input.lines().map(|l| l.parse().unwrap()).collect();
-    rucksacks.iter().map(|r| r.score_duplicated()).sum()
-}
-
-struct Group {
-    elf_1: Vec<u64>,
-    elf_2: Vec<u64>,
-    elf_3: Vec<u64>,
-}
-
-impl FromStr for Group {
-    type Err = ErasedError;
-    fn from_str(s: &str) -> Result<Self, Self::Err> {
-        if s.len() % 2 != 0 {
-            return Err("ERROR: Input has uneven number of items.".into());
-        }
-        if s.lines().count() != 3 {
-            return Err("ERROR: Number of lines in Input does not equal 3.".into());
-        }
-        let mut lines = s.lines();
-        Ok(Group {
-            elf_1: lines
-                .next()
-                .unwrap()
-                .chars()
-                .map(priority)
-                .collect::<Result<_, ErasedError>>()?,
-            elf_2: lines
-                .next()
-                .unwrap()
-                .chars()
-                .map(priority)
-                .collect::<Result<_, ErasedError>>()?,
-            elf_3: lines
-                .next()
-                .unwrap()
-                .chars()
-                .map(priority)
-                .collect::<Result<_, ErasedError>>()?,
-        })
+    let mut out = 0;
+    for line in input.lines() {
+        out += score_shares([&line[..line.len() / 2], &line[line.len() / 2..]])
     }
-}
-
-impl Group {
-    fn label_group(&self) -> u64 {
-        let mut counts_1 = [0; 52];
-        let mut counts_2 = [0; 52];
-        let mut counts_3 = [0; 52];
-
-        for item in self.elf_1.iter() {
-            counts_1[*item as usize - 1] += 1
-        }
-        for item in self.elf_2.iter() {
-            counts_2[*item as usize - 1] += 1
-        }
-        for item in self.elf_3.iter() {
-            counts_3[*item as usize - 1] += 1
-        }
-
-        for i in 0..52 {
-            if counts_1[i] > 0 && counts_2[i] > 0 && counts_3[i] > 0 {
-                return i as u64 + 1;
-            }
-        }
-        0
-    }
+    out
 }
 
 fn part_2(input: &str) -> u64 {
-    let n_groups = input.lines().count() / 3;
-    let mut groups: Vec<Group> = Vec::with_capacity(n_groups);
-
-    for mut g in &input.lines().chunks(3) {
-        let group_input = g.join("\n");
-        groups.push(group_input.parse().expect("ERROR: Could not parse input."));
+    let mut out = 0;
+    for arr in input.lines().array_chunks::<3>() {
+        out += score_shares(arr)
     }
-    return groups.iter().map(|g| g.label_group()).sum();
+    out
 }
 
 pub fn solve() -> SolutionPair {
@@ -147,12 +50,23 @@ pub fn solve() -> SolutionPair {
 }
 
 #[test]
+fn test_score_shares() {
+    let input = ["ah", "hc"];
+    let res = score_shares(input);
+    assert_eq!(res, 8);
+
+    let input = ["aA", "hA"];
+    let res = score_shares(input);
+    assert_eq!(res, 27);
+}
+
+#[test]
 fn test_priority() {
     let c = 'a';
-    let prio = priority(c).unwrap();
+    let prio = priority(c);
     assert_eq!(prio, 1);
     let c = 'A';
-    let prio = priority(c).unwrap();
+    let prio = priority(c);
     assert_eq!(prio, 27);
 }
 
