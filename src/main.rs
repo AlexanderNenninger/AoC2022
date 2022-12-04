@@ -1,4 +1,3 @@
-#![allow(dead_code)]
 #![feature(iter_array_chunks)]
 
 mod days;

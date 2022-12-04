@@ -1,7 +1,6 @@
 use crate::{Solution, SolutionPair};
 use std::{error::Error, num::ParseIntError, str::FromStr};
 
-const TEST_INPUT: &str = include_str!("../../input/day01_test.txt");
 const INPUT: &str = include_str!("../../input/day01.txt");
 ///////////////////////////////////////////////////////////////////////////////
 
