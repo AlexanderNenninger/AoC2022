@@ -20,6 +20,7 @@ impl<T: PartialOrd> Interval<T> {
         })
     }
 
+    #[inline]
     fn check(&self) -> () {
         if self.lower_bound > self.upper_bound {
             panic!("ERROR: Lower bound of Interval larger than upper bound.")
@@ -98,9 +99,8 @@ fn part_2<T: PartialOrd>(intervals: &Vec<(Interval<T>, Interval<T>)>) -> u64 {
 }
 
 pub fn solve() -> SolutionPair {
-    const INPUT_FILE: &str = "input/day04.txt";
-    let input = read_to_string(INPUT_FILE).unwrap();
-    let intervals = prepare_input(&input);
+    const INPUT: &str = include_str!("../../input/day04.txt");
+    let intervals = prepare_input(&INPUT);
     let sol1: u64 = part_1(&intervals);
     let sol2: u64 = part_2(&intervals);
 
