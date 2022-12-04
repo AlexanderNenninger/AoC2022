@@ -41,10 +41,9 @@ fn part_2(input: &str) -> u64 {
 }
 
 pub fn solve() -> SolutionPair {
-    const INPUT_FILE: &str = "input/day03.txt";
-    let input = read_to_string(INPUT_FILE).expect("ERROR: Input could not be read.");
-    let sol1: u64 = part_1(&input.trim());
-    let sol2: u64 = part_2(&input.trim());
+    const INPUT: &str = include_str!("../../input/day03.txt");
+    let sol1: u64 = part_1(&INPUT.trim());
+    let sol2: u64 = part_2(&INPUT.trim());
 
     (Solution::U64(sol1), Solution::U64(sol2))
 }
