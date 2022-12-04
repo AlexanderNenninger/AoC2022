@@ -1,5 +1,5 @@
 use crate::{Solution, SolutionPair};
-use std::{error::Error, fs::read_to_string, str::FromStr};
+
 ///////////////////////////////////////////////////////////////////////////////
 fn priority(c: char) -> u64 {
     if c.is_ascii_lowercase() {
