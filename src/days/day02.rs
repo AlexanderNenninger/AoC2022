@@ -1,5 +1,5 @@
 use crate::{Solution, SolutionPair};
-use std::{error::Error, fs::read_to_string, str::FromStr};
+use std::{error::Error, str::FromStr};
 
 ///////////////////////////////////////////////////////////////////////////////
 #[derive(Debug, PartialEq, Eq, Clone, Copy)]
@@ -144,10 +144,9 @@ fn part_2(input: &str) -> u64 {
 }
 
 pub fn solve() -> SolutionPair {
-    const INPUT: &str = "input/day02.txt";
-    let input = read_to_string(INPUT).unwrap();
-    let sol1: u64 = part_1(&input);
-    let sol2: u64 = part_2(&input);
+    const INPUT: &str = include_str!("../../input/day02.txt");
+    let sol1: u64 = part_1(&INPUT);
+    let sol2: u64 = part_2(&INPUT);
 
     (Solution::U64(sol1), Solution::U64(sol2))
 }
