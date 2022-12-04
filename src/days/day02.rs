@@ -1,5 +1,5 @@
 use crate::{Solution, SolutionPair};
-use std::{error::Error, fs::read_to_string, str::FromStr};
+use std::{error::Error, str::FromStr};
 
 ///////////////////////////////////////////////////////////////////////////////
 #[derive(Debug, PartialEq, Eq, Clone, Copy)]
