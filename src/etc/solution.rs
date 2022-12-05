@@ -1,5 +1,10 @@
-use std::fmt::{Display, Formatter, Result};
+use std::{
+    error::Error,
+    fmt::{Display, Formatter, Result},
+};
 use Solution::*;
+
+pub type ErasedError = Box<dyn Error + Send + Sync + 'static>;
 
 pub enum Solution {
     I32(i32),
