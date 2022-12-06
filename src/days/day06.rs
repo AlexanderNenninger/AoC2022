@@ -1,6 +1,7 @@
 use crate::{Solution, SolutionPair};
 
 ///////////////////////////////////////////////////////////////////////////////
+#[derive(Debug)]
 struct AlphabetMultiset {
     data: u64,
 }
@@ -17,8 +18,8 @@ impl AlphabetMultiset {
         panic!("ERROR: Passed non-ascii non-lowercase character.")
     }
 
-    fn push(&mut self, c: u8) {
-        self.data |= 1 << Self::index(c)
+    fn toggle(&mut self, c: u8) {
+        self.data ^= 1 << Self::index(c)
     }
 
     fn len(&self) -> u32 {
@@ -27,13 +28,15 @@ impl AlphabetMultiset {
 }
 
 fn find_packet_start<const WINDOW: usize>(input: &str) -> u64 {
-    for (idx, bs) in input.as_bytes().array_windows::<WINDOW>().enumerate() {
-        let mut already_seen = AlphabetMultiset::new();
-        for b in bs {
-            already_seen.push(*b);
-        }
-        if already_seen.len() == WINDOW as u32 {
-            return idx as u64 + WINDOW as u64;
+    let mut already_seen = AlphabetMultiset::new();
+
+    for (i, b) in input.as_bytes().iter().enumerate() {
+        already_seen.toggle(*b);
+        if i >= WINDOW {
+            already_seen.toggle(input.as_bytes()[i - WINDOW]);
+            if already_seen.len() == WINDOW as u32 {
+                return (i + 1) as u64;
+            }
         }
     }
     0
