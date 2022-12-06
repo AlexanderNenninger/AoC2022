@@ -2,44 +2,37 @@ use crate::{Solution, SolutionPair};
 
 ///////////////////////////////////////////////////////////////////////////////
 struct AlphabetMultiset {
-    data: [u8; 26],
+    data: u64,
 }
 
 impl AlphabetMultiset {
     fn new() -> Self {
-        AlphabetMultiset { data: [0; 26] }
+        AlphabetMultiset { data: 0 }
     }
 
-    fn index(c: char) -> usize {
+    fn index(c: u8) -> u8 {
         if c.is_ascii_lowercase() {
-            return c as usize - 'a' as usize;
+            return c as u8 - 'a' as u8;
         }
         panic!("ERROR: Passed non-ascii non-lowercase character.")
     }
 
-    fn push(&mut self, c: char) {
-        self.data[Self::index(c)] += 1
+    fn push(&mut self, c: u8) {
+        self.data |= 1 << Self::index(c)
     }
 
-    fn all_unique(&self) -> bool {
-        for b in self.data {
-            if b > 1 {
-                return false;
-            }
-        }
-        true
+    fn len(&self) -> u32 {
+        self.data.count_ones()
     }
 }
 
 fn find_packet_start<const WINDOW: usize>(input: &str) -> u64 {
-    let chars: Vec<char> = input.chars().collect();
-    for (idx, cs) in chars.array_windows::<WINDOW>().enumerate() {
+    for (idx, bs) in input.as_bytes().array_windows::<WINDOW>().enumerate() {
         let mut already_seen = AlphabetMultiset::new();
-
-        for c in cs {
-            already_seen.push(*c);
+        for b in bs {
+            already_seen.push(*b);
         }
-        if already_seen.all_unique() {
+        if already_seen.len() == WINDOW as u32 {
             return idx as u64 + WINDOW as u64;
         }
     }
@@ -65,5 +58,5 @@ fn test_part_1() {
     assert_eq!(sol, 6);
     let input = "nznrnfrfntjfmvfwmzdfjlvtqnbhcprsg";
     let sol = find_packet_start::<4>(input);
-    assert_eq!(sol, 10);
+    assert_eq!(sol, 10)
 }
