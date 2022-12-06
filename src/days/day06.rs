@@ -2,13 +2,13 @@ use crate::{Solution, SolutionPair};
 
 ///////////////////////////////////////////////////////////////////////////////
 #[derive(Debug)]
-struct AlphabetMultiset {
+struct AlphabetBitset {
     data: u64,
 }
 
-impl AlphabetMultiset {
+impl AlphabetBitset {
     fn new() -> Self {
-        AlphabetMultiset { data: 0 }
+        AlphabetBitset { data: 0 }
     }
 
     fn index(c: u8) -> u8 {
@@ -28,7 +28,7 @@ impl AlphabetMultiset {
 }
 
 fn find_packet_start<const WINDOW: usize>(input: &str) -> u64 {
-    let mut already_seen = AlphabetMultiset::new();
+    let mut already_seen = AlphabetBitset::new();
 
     for (i, b) in input.as_bytes().iter().enumerate() {
         already_seen.toggle(*b);
