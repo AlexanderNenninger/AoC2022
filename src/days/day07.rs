@@ -26,7 +26,7 @@ impl Directory {
 impl FromStr for Directory {
     type Err = ErasedError;
     fn from_str(s: &str) -> Result<Self, Self::Err> {
-        let (prefix, name) = s
+        let (prefix, _name) = s
             .split_once(" ")
             .ok_or("ERROR: Directory input needs to be of the form 'dir *name*'")?;
         if prefix == "dir" {
@@ -42,11 +42,11 @@ struct File {
 }
 
 impl File {
-    fn new(size: u64) -> Self {
+    fn _new(size: u64) -> Self {
         File { size }
     }
 
-    fn size(&self, buf: &Vec<Node>) -> u64 {
+    fn size(&self, _buf: &Vec<Node>) -> u64 {
         return self.size;
     }
 }
@@ -54,7 +54,7 @@ impl File {
 impl FromStr for File {
     type Err = ErasedError;
     fn from_str(s: &str) -> Result<Self, Self::Err> {
-        let (size, name) = s
+        let (size, _name) = s
             .split_once(" ")
             .ok_or("ERROR: File input needs to be of the Form '*size* *name*'")?;
         let size: u64 = size.parse()?;
@@ -227,7 +227,7 @@ fn part_2(node_buffer: &Vec<Node>) -> u64 {
     let memory_size = 70000000;
     let max_space_used = memory_size - 30000000;
     let total_space_used = node_buffer[0].size(node_buffer);
-    let mut node_size = total_space_used;
+    let mut node_size;
 
     let mut max_space_after_deletion = 0;
     let mut ret_val = u64::MAX;
