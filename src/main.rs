@@ -1,5 +1,7 @@
 #![feature(iter_array_chunks)]
 #![feature(array_windows)]
+#![feature(iter_advance_by)]
+#![feature(generic_const_exprs)]
 
 mod days;
 mod etc;
