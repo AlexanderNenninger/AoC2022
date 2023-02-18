@@ -93,6 +93,22 @@ impl CPU {
     }
 }
 
+impl Iterator for CPU {
+    type Item = i64;
+
+    fn next(&mut self) -> Option<Self::Item> {
+        if self.current_instruction.is_none() {
+            if self.instruction_stack.len() > 0 {
+                self.load_instruction();
+            } else {
+                return None;
+            }
+        }
+        self.tick();
+        Some(self.register)
+    }
+}
+
 fn part_1(instructions: Vec<Instruction>) -> i64 {
     let mut cpu = CPU::new(instructions);
     cpu.load_instruction();
@@ -106,17 +122,41 @@ fn part_1(instructions: Vec<Instruction>) -> i64 {
     signal_strength
 }
 
+fn part_2(instructions: Vec<Instruction>) -> String {
+    const DISPLAY_WIDTH: usize = 40;
+    const DISPLAY_HEIGHT: usize = 6;
+
+    let cpu = CPU::new(instructions);
+    let mut out = String::with_capacity(DISPLAY_HEIGHT * DISPLAY_WIDTH);
+
+    for (idx, pos) in cpu.enumerate() {
+        let (_, col) = (idx / DISPLAY_WIDTH, idx % DISPLAY_WIDTH);
+
+        if col == 0 {
+            out.push('\n');
+        }
+
+        if (pos - col as i64).abs() < 2 {
+            out.push('#');
+        } else {
+            out.push('.')
+        }
+    }
+    out
+}
+
 pub fn solve() -> SolutionPair {
     const INPUT: &str = include_str!("../../input/day10.txt");
-    let instructions: Vec<Instruction> = INPUT.lines().map(|l| l.parse().unwrap()).rev().collect();
-    let sol1: i64 = part_1(instructions);
-    let sol2: u64 = 0;
+    let instructions: Vec<Instruction> = parse_instructions(INPUT);
+    let sol1: i64 = part_1(instructions.clone());
+    let sol2: String = part_2(instructions);
 
-    (Solution::I64(sol1), Solution::U64(sol2))
+    (Solution::I64(sol1), Solution::Str(sol2))
 }
 
 mod tests {
-    use super::{parse_instructions, part_1, Instruction, CPU};
+    #[allow(unused)]
+    use super::*;
 
     #[test]
     fn test_parse_instructions() {
@@ -138,7 +178,6 @@ mod tests {
             register: 1,
             cycles: 0,
         };
-
         let register_values = [1, 1, 1, 4, 4, -1];
         while cpu.instruction_stack.len() > 0 || cpu.current_instruction.is_some() {
             cpu.tick();
@@ -152,5 +191,25 @@ mod tests {
         let instructions = parse_instructions(input);
         let res = part_1(instructions);
         assert_eq!(res, 13140)
+    }
+
+    #[test]
+    fn test_iter() {
+        let input = "noop\naddx 3\naddx -5";
+        let instructions: Vec<Instruction> =
+            input.lines().map(|l| l.parse().unwrap()).rev().collect();
+        let cpu = CPU::new(instructions);
+        let register_values = [1, 1, 1, 4, 4, -1];
+        for (idx, val) in cpu.enumerate() {
+            assert_eq!(register_values[idx], val)
+        }
+    }
+
+    #[test]
+    fn test_part_2() {
+        let input = include_str!("../../input/day10_test.txt");
+        let instructions = parse_instructions(input);
+        let res = part_2(instructions);
+        println!("{}", res);
     }
 }
