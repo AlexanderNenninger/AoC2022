@@ -1,3 +1,4 @@
+#![allow(dead_code, unused)]
 use std::char::MAX;
 
 use crate::{Solution, SolutionPair};
@@ -11,7 +12,7 @@ fn index_2d<T>(i: usize, j: usize, ncols: usize, buf: &[T]) -> &T {
     &buf[i * ncols + j]
 }
 
-const rock_cycle: &[Rock] = &[Rock {
+const ROCK_CYCLE: &[Rock] = &[Rock {
     width: 4,
     height: 1,
     sprite: &[1, 1, 1, 1],
