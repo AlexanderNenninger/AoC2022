@@ -152,11 +152,11 @@ fn get_mod_val(monkeys: &Vec<Monkey>) -> i64 {
     monkeys.iter().map(|m| m.test_condition).product()
 }
 
-fn monkey_business(monkeys: &mut Vec<Monkey>, rounds: usize, divide_by: i64) -> u64 {
-    let mod_val = get_mod_val(monkeys);
+fn monkey_business(mut monkeys: Vec<Monkey>, rounds: usize, divide_by: i64) -> u64 {
+    let mod_val = get_mod_val(&monkeys);
 
     for _ in 0..rounds {
-        round(monkeys, mod_val, divide_by).unwrap();
+        round(&mut monkeys, mod_val, divide_by).unwrap();
     }
     let mut inspection_counts: Vec<usize> = monkeys
         .iter()
@@ -171,10 +171,10 @@ fn monkey_business(monkeys: &mut Vec<Monkey>, rounds: usize, divide_by: i64) -> 
 pub fn solve() -> SolutionPair {
     // Your solution here...
     let data = include_str!("../../input/day11.txt");
-    let mut monkeys: Vec<Monkey> = data.split("\n\n").map(|s| s.parse().unwrap()).collect();
+    let monkeys: Vec<Monkey> = data.split("\n\n").map(|s| s.parse().unwrap()).collect();
 
-    let sol1: u64 = monkey_business(&mut monkeys.clone(), 20, 3);
-    let sol2: u64 = monkey_business(&mut monkeys, 10000, 1);
+    let sol1: u64 = monkey_business(monkeys.clone(), 20, 3);
+    let sol2: u64 = monkey_business(monkeys, 10000, 1);
 
     (Solution::U64(sol1), Solution::U64(sol2))
 }
@@ -223,16 +223,16 @@ mod tests {
     #[test]
     fn test_part_1() {
         let data = include_str!("../../input/day11_test.txt");
-        let mut monkeys: Vec<Monkey> = data.split("\n\n").map(|s| s.parse().unwrap()).collect();
-        let res = monkey_business(&mut monkeys, 20, 3);
+        let monkeys: Vec<Monkey> = data.split("\n\n").map(|s| s.parse().unwrap()).collect();
+        let res = monkey_business(monkeys, 20, 3);
         assert_eq!(res, 10605);
     }
 
     #[test]
     fn test_part_2() {
         let data = include_str!("../../input/day11_test.txt");
-        let mut monkeys: Vec<Monkey> = data.split("\n\n").map(|s| s.parse().unwrap()).collect();
-        let res = monkey_business(&mut monkeys, 10000, 1);
+        let monkeys: Vec<Monkey> = data.split("\n\n").map(|s| s.parse().unwrap()).collect();
+        let res = monkey_business(monkeys, 10000, 1);
         assert_eq!(res, 2713310158);
     }
 }
