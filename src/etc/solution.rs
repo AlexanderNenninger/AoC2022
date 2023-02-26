@@ -1,3 +1,4 @@
+#![allow(unused)]
 use std::{
     error::Error,
     fmt::{Display, Formatter, Result},
@@ -56,6 +57,10 @@ where
             return Some(&mut self.0[Self::_index(i, j)]);
         }
         None
+    }
+
+    pub fn each_index(&self) -> impl Iterator<Item = [usize; 2]> {
+        (0..M).flat_map(|i| (0..N).map(move |j| [i, j]))
     }
 }
 
@@ -118,5 +123,19 @@ where
 {
     fn index_mut(&mut self, index: usize) -> &mut Self::Output {
         &mut self.0[index]
+    }
+}
+
+#[cfg(test)]
+mod test {
+    use super::*;
+
+    #[test]
+    fn each_index() {
+        const M: usize = 5;
+        const N: usize = 7;
+        let mat: Matrix<M, N, u8> = Matrix::new(0);
+        let idxs: Vec<_> = mat.each_index().collect();
+        assert_eq!(idxs.len(), M * N)
     }
 }
