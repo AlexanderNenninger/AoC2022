@@ -65,7 +65,6 @@ impl FromStr for Monkey {
         let mut lines = s.lines();
 
         let header_str = lines.next().ok_or(ERROR_MSG)?;
-        dbg!(header_str);
 
         let id: usize = header_str
             .split_once(' ')
@@ -75,7 +74,6 @@ impl FromStr for Monkey {
             .parse()?;
 
         let item_str = lines.next().ok_or(ERROR_MSG)?;
-        dbg!(&item_str);
 
         let items = item_str
             .chars()
@@ -87,23 +85,20 @@ impl FromStr for Monkey {
             .collect::<Result<Vec<i64>, _>>()?;
 
         let op_str = lines.next().ok_or(ERROR_MSG)?;
-        dbg!(op_str);
+
         let operation: Operation = op_str.parse()?;
 
         let test_condition_str = lines.next().ok_or(ERROR_MSG)?;
-        dbg!(test_condition_str);
 
         let (_, test_condition_str) = test_condition_str.rsplit_once(" ").ok_or(ERROR_MSG)?;
         let test_condition: i64 = test_condition_str.parse()?;
 
         let target_monkey_str = lines.next().ok_or(ERROR_MSG)?;
-        dbg!(target_monkey_str);
 
         let (_, target_monkey_str) = target_monkey_str.rsplit_once(" ").ok_or(ERROR_MSG)?;
         let target_monkey_1: usize = target_monkey_str.parse()?;
 
         let target_monkey_str = lines.next().ok_or(ERROR_MSG)?;
-        dbg!(target_monkey_str);
 
         let (_, target_monkey_str) = target_monkey_str.rsplit_once(" ").ok_or(ERROR_MSG)?;
         let target_monkey_2: usize = target_monkey_str.parse()?;
@@ -205,7 +200,6 @@ mod tests {
         let data: &str = "Monkey 0:\nStarting items: 79, 98\nOperation: new = old * 19\nTest: divisible by 23\nIf true: throw to monkey 2\nIf false: throw to monkey 3";
         let res = data.parse::<Monkey>();
         assert!(res.is_ok());
-        dbg!(&res.unwrap());
     }
 
     #[test]
