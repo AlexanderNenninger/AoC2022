@@ -10,7 +10,7 @@ To run: `cargo run --release [days...]`
 Get a session cookie from your browser and copy it into `cookie.key`. Then run `./get-input.sh day_you_want_to_download`.
 
 ## Benchmark 
-on M1 Macbook Pro 13', `rustc 1.69.0-nightly (c18a5e8a5 2023-01-25)`.
+on M1 Macbook Pro 13', `rustc 1.69.0-nightly (c18a5e8a5 2023-01-25)`. Input is baked as strings into the binary, hence the time presented do not account for disk access. Though they do account for parsing input. General assumptions about the input format were made, i.e. non-ascii characters, error handling on mal-formed input, etc.
 
 ```
 === Day 01 ===
