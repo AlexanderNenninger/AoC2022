@@ -280,7 +280,7 @@ pub fn solve() -> SolutionPair {
     let sol2: u64 = packets
         .into_iter()
         .enumerate()
-        .filter(|(i, p)| *p == p2 || *p == p6)
+        .filter(|(_, p)| *p == p2 || *p == p6)
         .map(|(i, _)| i as u64 + 1)
         .product();
 
