@@ -115,13 +115,13 @@ enum Packet {
 impl FromStr for Packet {
     type Err = ErasedError;
 
-    /// Iterative single pass parser. Begin with out AST being an empty List.
-    /// Any time we encounter an opening Bracket, we push a new List onto the old children of
-    /// the current node and update our current node to point to the end ot the just pushed list.
+    /// Iterative single pass parser. Begin with current_node as an empty list.
+    /// Any time we encounter an opening bracket, we add a new list to the children of
+    /// the current node and update our current_node to point to the end ot the just pushed list.
     /// If we encounter a closing bracket, we move up one level in the AST.
-    /// Parents are rememberd using a stack of raw pointers we push to and pop from. This ensures
+    /// Parents are tracked using a stack of raw pointers we push to and pop from. This ensures
     /// we aren't aliasing anything. Miri seems to be content.
-    /// If we hit a Literal, we just push it onto the children of the current node.
+    /// If we hit a Literal, we just add it to the children of current_node.
     /// e.g. s = "[[12,[]],1,23]"
     fn from_str(s: &str) -> Result<Self, Self::Err> {
         use Packet::*;
