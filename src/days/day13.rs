@@ -1,40 +1,91 @@
-use std::{fmt::Debug, str::FromStr};
+use std::{cmp, fmt::Debug, str::FromStr};
 
 use crate::{etc::ErasedError, Solution, SolutionPair};
 
 ///////////////////////////////////////////////////////////////////////////////
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+enum ThreeValuedOrdering {
+    Less,
+    Greater,
+    Undecidable,
+}
+
+impl ThreeValuedOrdering {
+    /// Returns `true` if the three valued ordering is [`Less`].
+    ///
+    /// [`Less`]: ThreeValuedOrdering::Less
+    #[must_use]
+    fn is_less(&self) -> bool {
+        matches!(self, Self::Less)
+    }
+
+    /// Returns `true` if the three valued ordering is [`Greater`].
+    ///
+    /// [`Greater`]: ThreeValuedOrdering::Greater
+    #[allow(unused)]
+    #[must_use]
+    fn is_greater(&self) -> bool {
+        matches!(self, Self::Greater)
+    }
+
+    /// Returns `true` if the three valued ordering is [`Undecidable`].
+    ///
+    /// [`Undecidable`]: ThreeValuedOrdering::Undecidable
+    #[allow(unused)]
+    #[must_use]
+    fn is_undecidable(&self) -> bool {
+        matches!(self, Self::Undecidable)
+    }
+}
+
+trait ThreeValuedOrd {
+    fn three_cmp(&self, other: &Self) -> ThreeValuedOrdering;
+}
+
+impl ThreeValuedOrd for i64 {
+    #[inline]
+    fn three_cmp(&self, other: &Self) -> ThreeValuedOrdering {
+        use ThreeValuedOrdering::*;
+        match self.partial_cmp(other) {
+            Some(ord) => match ord {
+                cmp::Ordering::Less => Less,
+                cmp::Ordering::Equal => Undecidable,
+                cmp::Ordering::Greater => Greater,
+            },
+            None => Undecidable,
+        }
+    }
+}
+
+impl<T> ThreeValuedOrd for Vec<T>
+where
+    T: ThreeValuedOrd,
+{
+    fn three_cmp(&self, other: &Self) -> ThreeValuedOrdering {
+        use ThreeValuedOrdering::*;
+        let mut l_it = self.iter();
+        let mut r_it = other.iter();
+        loop {
+            return match (l_it.next(), r_it.next()) {
+                (None, None) => Undecidable,
+                (None, Some(_)) => Less,
+                (Some(_), None) => Greater,
+                (Some(l_item), Some(r_item)) => match l_item.three_cmp(r_item) {
+                    Less => Less,
+                    Greater => Greater,
+                    Undecidable => continue,
+                },
+            };
+        }
+    }
+}
 
 #[derive(Debug, Clone, Copy, PartialEq)]
 enum Token {
     BrOpen,
     BrClose,
     Lit(i64),
-}
-
-impl Token {
-    /// Returns `true` if the token is [`BrOpen`].
-    ///
-    /// [`BrOpen`]: Token::BrOpen
-    #[must_use]
-    fn is_br_open(&self) -> bool {
-        matches!(self, Self::BrOpen)
-    }
-
-    /// Returns `true` if the token is [`BrClose`].
-    ///
-    /// [`BrClose`]: Token::BrClose
-    #[must_use]
-    fn is_br_close(&self) -> bool {
-        matches!(self, Self::BrClose)
-    }
-
-    /// Returns `true` if the token is [`Lit`].
-    ///
-    /// [`Lit`]: Token::Lit
-    #[must_use]
-    fn is_lit(&self) -> bool {
-        matches!(self, Self::Lit(..))
-    }
 }
 
 /// Tokenizer using finite state machine logic to tokenize nested lists of integers.
@@ -152,7 +203,7 @@ impl FromStr for Packet {
             // SAFETY: We are not using parents to alias any nodes.
             // The only access occurs through `current_node = parents.pop().unwrap()`
             match unsafe { &mut *current_node } {
-                Value(i) => unreachable!("ERROR: current_node points to a literal value."),
+                Value(_) => unreachable!("ERROR: current_node points to a literal value."),
                 List(v) => match token {
                     BrOpen => {
                         v.push(List(Vec::new()));
@@ -173,10 +224,65 @@ impl FromStr for Packet {
     }
 }
 
+impl ThreeValuedOrd for Packet {
+    fn three_cmp(&self, other: &Self) -> ThreeValuedOrdering {
+        use Packet::*;
+        match (self, other) {
+            (Value(l_val), Value(r_val)) => l_val.three_cmp(r_val),
+            (Value(l_val), List(r_vec)) => vec![Value(*l_val)].three_cmp(r_vec),
+            (List(l_vec), Value(r_val)) => l_vec.three_cmp(&vec![Value(*r_val)]),
+            (List(l_vec), List(r_vec)) => l_vec.three_cmp(r_vec),
+        }
+    }
+}
+
+impl PartialOrd for Packet {
+    #[inline]
+    fn partial_cmp(&self, other: &Self) -> Option<cmp::Ordering> {
+        use cmp::Ordering::*;
+        match self.three_cmp(other) {
+            ThreeValuedOrdering::Less => Some(Less),
+            ThreeValuedOrdering::Greater => Some(Greater),
+            ThreeValuedOrdering::Undecidable => None,
+        }
+    }
+}
+
+fn read_data(s: &str) -> Result<Vec<(Packet, Packet)>, ErasedError> {
+    let mut out = Vec::new();
+    let parse_error = |s: &str| format!("ERROR: could not parse '{s}'.");
+    for pair in s.split("\n\n") {
+        let (fst, snd) = pair.split_once("\n").ok_or(parse_error(pair))?;
+        out.push((fst.trim().parse()?, snd.trim().parse()?));
+    }
+    Ok(out)
+}
+
 pub fn solve() -> SolutionPair {
-    // Your solution here...
-    let sol1: u64 = 0;
-    let sol2: u64 = 0;
+    const INPUT: &str = include_str!("../../input/day13.txt");
+    let pairs = read_data(INPUT).unwrap();
+    let mut idx_sum: u64 = 0;
+    for (i, (left, right)) in pairs.iter().enumerate() {
+        if left.three_cmp(right).is_less() {
+            idx_sum += i as u64 + 1;
+        }
+    }
+
+    let mut input_2 = INPUT.replace("\n\n", "\n").trim().to_string();
+    input_2.push_str("\n[[2]]\n[[6]]");
+    let mut packets: Vec<Packet> = input_2.lines().map(|l| l.parse().unwrap()).collect();
+    packets.sort_by(|a, b| a.partial_cmp(b).unwrap());
+
+    let p2: Packet = "[[2]]".parse().unwrap();
+    let p6: Packet = "[[6]]".parse().unwrap();
+
+    let sol1: u64 = idx_sum;
+    let sol2: u64 = packets
+        .into_iter()
+        .enumerate()
+        .filter(|(i, p)| *p == p2 || *p == p6)
+        .map(|(i, _)| i as u64 + 1)
+        .product();
 
     (Solution::U64(sol1), Solution::U64(sol2))
 }
@@ -219,5 +325,29 @@ mod test {
         let s = "[[12,34],5,[]]";
         let packets: Packet = s.parse().unwrap();
         println!("{packets:?}");
+    }
+
+    #[test]
+    fn test_three_valued_cmp_long() {
+        use ThreeValuedOrdering::*;
+        let left_data = "[1,[2,[3,[4,[5,6,7]]]],8,9]";
+        let right_data = "[1,[2,[3,[4,[5,6,0]]]],8,9]";
+
+        let left_packet: Packet = left_data.parse().unwrap();
+        let right_packet: Packet = right_data.parse().unwrap();
+
+        assert_eq!(left_packet.three_cmp(&right_packet), Greater);
+    }
+
+    #[test]
+    fn test_three_valued_cmp_empty() {
+        use ThreeValuedOrdering::*;
+        let left_data = "[[[]]]";
+        let right_data = "[[]]";
+
+        let left_packet: Packet = left_data.parse().unwrap();
+        let right_packet: Packet = right_data.parse().unwrap();
+
+        assert_eq!(left_packet.three_cmp(&right_packet), Greater);
     }
 }
