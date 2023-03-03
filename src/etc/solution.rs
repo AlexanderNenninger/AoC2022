@@ -42,7 +42,10 @@ where
     [T; M * N]:,
 {
     fn _index(i: usize, j: usize) -> usize {
-        i * N + j
+        if i < M && j < N {
+            return i * N + j;
+        }
+        panic!("ERROR: Index ({i},{j}) out of bounds for size ({M},{N}).")
     }
 
     pub fn get(&self, i: usize, j: usize) -> Option<&T> {
@@ -106,6 +109,17 @@ where
     }
 }
 
+impl<const M: usize, const N: usize, T> IndexMut<[usize; 2]> for Matrix<M, N, T>
+where
+    [(); M * N]:,
+{
+    fn index_mut(&mut self, index: [usize; 2]) -> &mut Self::Output {
+        let [i, j] = index;
+        let idx = Self::_index(i, j);
+        &mut self.0[idx]
+    }
+}
+
 impl<const M: usize, const N: usize, T> Index<usize> for Matrix<M, N, T>
 where
     [(); M * N]:,
@@ -123,6 +137,22 @@ where
 {
     fn index_mut(&mut self, index: usize) -> &mut Self::Output {
         &mut self.0[index]
+    }
+}
+
+impl<const M: usize, const N: usize, T> Display for Matrix<M, N, T>
+where
+    [(); M * N]:,
+    T: Display,
+{
+    fn fmt(&self, f: &mut Formatter<'_>) -> Result {
+        for i in 0..M {
+            for j in 0..N {
+                write!(f, "{}", self[[i, j]])?
+            }
+            writeln!(f, "")?
+        }
+        Ok(())
     }
 }
 
