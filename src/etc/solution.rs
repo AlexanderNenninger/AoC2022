@@ -45,7 +45,7 @@ where
         if i < M && j < N {
             return i * N + j;
         }
-        panic!("ERROR: Index {i},{j} out of bounds for size {M},{N}.")
+        panic!("ERROR: Index ({i},{j}) out of bounds for size ({M},{N}).")
     }
 
     pub fn get(&self, i: usize, j: usize) -> Option<&T> {
