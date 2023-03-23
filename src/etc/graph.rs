@@ -98,7 +98,7 @@ impl Graph {
 }
 
 impl Deref for Graph {
-    type Target = Vec<Node>;
+    type Target = [Node];
 
     fn deref(&self) -> &Self::Target {
         &self.nodes
