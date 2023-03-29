@@ -39,3 +39,4 @@ Cargo.lock
 !.vscode/*.code-snippets
 
 # End of https://www.toptal.com/developers/gitignore/api/rust,visualstudiocode
+src/days/day16.rs
