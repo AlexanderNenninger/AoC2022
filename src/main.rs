@@ -4,6 +4,7 @@
 #![feature(iter_advance_by)]
 #![feature(generic_const_exprs)]
 #![feature(get_many_mut)]
+#![feature(const_slice_index)]
 
 mod days;
 mod etc;
