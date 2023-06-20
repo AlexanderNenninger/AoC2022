@@ -5,6 +5,9 @@
 #![feature(generic_const_exprs)]
 #![feature(get_many_mut)]
 #![feature(const_slice_index)]
+#![feature(hash_set_entry)]
+#![feature(impl_trait_projections)]
+#![feature(allocator_api, new_uninit)]
 
 mod days;
 mod etc;

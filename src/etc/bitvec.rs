@@ -1,3 +1,4 @@
+#![allow(unused)]
 const USIZE_BITS: usize = usize::BITS as usize;
 
 const TRUE: bool = true;
