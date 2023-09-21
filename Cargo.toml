@@ -6,7 +6,9 @@
     # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
+    bit-set       ="0.5.3"
     derive_more   ="0.99.17"
+    itertools     ="0.10.5"
     lazy_static   ="1.4.0"
     mimalloc      ="0.1.36"
     num-traits    ="0.2.15"
@@ -16,3 +18,7 @@
 [profile.release]
     debug=true
     lto  =true
+
+[profile.test]
+    # lto      =true
+    opt-level=3
