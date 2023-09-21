@@ -10,6 +10,7 @@ use std::{
     fmt::{write, Display},
     io::Write,
     rc::Rc,
+    task,
 };
 
 type NodeId = usize;
@@ -285,6 +286,10 @@ fn total_flow_rate(graph: &Graph, opened: &BitSet) -> i64 {
     opened.iter().map(|node| graph.flow_rates[node]).sum()
 }
 
+/// The maximal relievable pressure in each state is calculated as
+///
+/// current_flow_rate * time_remaining + sum_i flow_rate(unopened[i])*(time_remaining - 2i + 1)
+///
 fn max_relievable_pressure(graph: &Graph, opened: &BitSet, time_remaining: i64) -> i64 {
     let mut relievable_pressure = total_flow_rate(graph, opened) * time_remaining;
 
@@ -301,8 +306,6 @@ fn max_relievable_pressure(graph: &Graph, opened: &BitSet, time_remaining: i64) 
 
     for flow_rate in flow_rates {
         time_remaining -= 1;
-
-        dbg!(flow_rate, time_remaining);
         relievable_pressure += flow_rate * time_remaining;
         time_remaining -= 1;
     }
@@ -352,7 +355,8 @@ fn pressure_bfs(
             best_path = path.clone();
         }
 
-        // If we can never relieve more pressure than the best we already found, skip iteration.
+        // If we can never relieve more pressure than the best we already found, we
+        // prune the branch.
         if pressure_reliefed + max_relievable_pressure(graph, &opened, time_remaining)
             < max_pressure_relieved
         {
